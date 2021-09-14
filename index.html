@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+
+  <title>Red Black Tree</title>
+
+  <style>
+
+    .node circle {
+      fill: #000;
+      stroke: steelblue;
+      stroke-width: 3px;
+    }
+
+    .node.red {
+      fill: red;
+    }
+
+    .node.black {
+      fill: black;
+    }
+
+    .node text { font: 12px sans-serif; fill: white; }
+
+    .link {
+      fill: none;
+      stroke: #ccc;
+      stroke-width: 2px;
+    }
+
+  </style>
+
+</head>
+
+<body>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.min.js"></script>
+
+<script>
+
+  let treeData = [
+    {
+      "value": "x",
+      "parent": "null",
+      "color": "black",
+      "children": [
+        {
+          "value": "y",
+          "parent": "x",
+          "color": "red",
+          "children": [
+            {
+              "value": "a",
+              "parent": "y",
+              "color": "black",
+            },
+            {
+              "value": "b",
+              "parent": "y",
+              "color": "black",
+            }
+          ]
+        },
+        {
+          "value": "r",
+          "parent": "x",
+          "color": "red",
+        }
+      ]
+    }
+  ];
+
+  const margin = {top: 40, right: 120, bottom: 20, left: 120};
+  const  width = 960 - margin.right - margin.left;
+  const  height = 500 - margin.top - margin.bottom;
+
+  let i = 0;
+
+  let tree = d3.layout.tree()
+    .size([height, width]);
+
+  let diagonal = d3.svg.diagonal()
+    .projection(function(d) { return [d.x, d.y]; });
+
+  let svg = d3.select("body").append("svg")
+    .attr("width", width + margin.right + margin.left)
+    .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+  root = treeData[0];
+
+  update(root);
+
+  function update(source) {
+
+    let nodes = tree.nodes(root).reverse();
+    let links = tree.links(nodes);
+
+    nodes.forEach(d => d.y = d.depth * 100);
+
+    let node = svg.selectAll("g.node")
+      .data(nodes, d => d.id || (d.id = ++i));
+
+    let nodeEnter = node.enter().append("g")
+      .attr("class", "node")
+      .attr("transform", d =>
+        "translate(" + d.x + "," + d.y + ")");
+
+    nodeEnter.append("circle")
+      .attr("class", d => "node " + d.color)
+      .attr("r", 10);
+
+    nodeEnter.append("text")
+      .attr("class", "node")
+      .attr("y", 0)
+      .attr("dy", ".35em")
+      .attr("text-anchor", "middle")
+      .text( d => d.value)
+      .style("fill-opacity", 1);
+
+    let link = svg.selectAll("path.link")
+      .data(links, d => d.target.id);
+    
+    link.enter().insert("path", "g")
+      .attr("class", "link")
+      .attr("d", diagonal);
+
+  }
+
+</script>
+
+</body>
+</html>
